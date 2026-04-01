@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Para Yarely 💖</title>
+
+<style>
+body {
+    margin: 0;
+    background: linear-gradient(to right, #ff9a9e, #fecfef);
+    text-align: center;
+    font-family: Arial;
+}
+
+/* 🎬 Pantalla inicio */
+#startScreen {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, #ff9a9e, #fecfef);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+}
+
+#startScreen h1 {
+    color: white;
+    font-size: 28px;
+}
+
+#startBtn {
+    padding: 12px 20px;
+    font-size: 18px;
+    background: #ff1493;
+    color: white;
+    border: none;
+    border-radius: 10px;
+}
+
+/* 🎮 juego */
+canvas {
+    margin-top: 20px;
+    background: #fff0f5;
+    border: 4px solid #ff69b4;
+    border-radius: 10px;
+}
+
+#score {
+    color: white;
+    font-size: 18px;
+}
+
+/* controles */
+.controls {
+    margin-top: 10px;
+}
+
+button {
+    font-size: 18px;
+    padding: 10px;
+    margin: 5px;
+    border: none;
+    border-radius: 10px;
+    background: #ff69b4;
+    color: white;
+}
+</style>
+</head>
+
+<body>
+
+<!-- 💖 Pantalla inicio -->
+<div id="startScreen">
+    <h1>🐍 Para Yarely 💖</h1>
+    <p style="color:white;">Hecho con amor 💕</p>
+    <button id="startBtn">Jugar 💖</button>
+</div>
+
+<p id="score">Puntos: 0</p>
+<canvas id="game" width="300" height="300"></canvas>
+
+<div class="controls">
+    <div>
+        <button onclick="setDirection('UP')">⬆️</button>
+    </div>
+    <div>
+        <button onclick="setDirection('LEFT')">⬅️</button>
+        <button onclick="setDirection('DOWN')">⬇️</button>
+        <button onclick="setDirection('RIGHT')">➡️</button>
+    </div>
+</div>
+
+<!-- 🎵 sonido -->
+<audio id="eatSound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const startScreen = document.getElementById("startScreen");
+
+let box = 15;
+let snake, direction, food, score, game;
+
+document.getElementById("startBtn").onclick = () => {
+    startScreen.style.display = "none";
+    startGame();
+};
+
+function startGame(){
+    snake = [{x:150,y:150}];
+    direction = "RIGHT";
+    score = 0;
+
+    food = {
+        x: Math.floor(Math.random()*20)*box,
+        y: Math.floor(Math.random()*20)*box
+    };
+
+    game = setInterval(draw, 120);
+}
+
+function setDirection(dir) {
+    if(dir === "UP" && direction !== "DOWN") direction = "UP";
+    else if(dir === "DOWN" && direction !== "UP") direction = "DOWN";
+    else if(dir === "LEFT" && direction !== "RIGHT") direction = "LEFT";
+    else if(dir === "RIGHT" && direction !== "LEFT") direction = "RIGHT";
+}
+
+function draw() {
+    ctx.fillStyle = "#fff0f5";
+    ctx.fillRect(0,0,300,300);
+
+    for(let i=0;i<snake.length;i++){
+        if(i===0){
+            ctx.fillStyle="#ff1493";
+            ctx.fillRect(snake[i].x,snake[i].y,box,box);
+
+            // moño 🎀
+            ctx.fillStyle="#ff69b4";
+            ctx.fillRect(snake[i].x+3,snake[i].y-3,4,4);
+            ctx.fillRect(snake[i].x+8,snake[i].y-3,4,4);
+        } else {
+            ctx.fillStyle=(i%2===0)?"#ffb6c1":"#ffc0cb";
+            ctx.fillRect(snake[i].x,snake[i].y,box,box);
+        }
+    }
+
+    // 🍓 comida
+    ctx.fillStyle="#ff007f";
+    ctx.beginPath();
+    ctx.arc(food.x+7,food.y+7,6,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.fillStyle="green";
+    ctx.fillRect(food.x+5,food.y-2,4,4);
+
+    let snakeX = snake[0].x;
+    let snakeY = snake[0].y;
+
+    if(direction==="LEFT") snakeX-=box;
+    if(direction==="UP") snakeY-=box;
+    if(direction==="RIGHT") snakeX+=box;
+    if(direction==="DOWN") snakeY+=box;
+
+    if(snakeX===food.x && snakeY===food.y){
+        score++;
+        document.getElementById("score").innerText="Puntos: "+score;
+
+        document.getElementById("eatSound").play(); // 🎵 sonido
+
+        food={
+            x: Math.floor(Math.random()*20)*box,
+            y: Math.floor(Math.random()*20)*box
+        };
+    } else {
+        snake.pop();
+    }
+
+    let newHead={x:snakeX,y:snakeY};
+
+    if(
+        snakeX<0||snakeY<0||
+        snakeX>=300||snakeY>=300||
+        collision(newHead,snake)
+    ){
+        clearInterval(game);
+        alert("💖 Te amo Yarely, intenta otra vez 💕");
+        location.reload();
+    }
+
+    snake.unshift(newHead);
+}
+
+function collision(head,array){
+    for(let i=0;i<array.length;i++){
+        if(head.x===array[i].x && head.y===array[i].y){
+            return true;
+        }
+    }
+    return false;
+}
+</script>
+
+</body>
+</html>
